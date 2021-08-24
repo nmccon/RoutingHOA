@@ -1,5 +1,5 @@
 RoutingHOA {
-	var server, <num, numChannels, <>group, <>masterBus, <>fxBus, <ambiBus, <sendBus, <sendSynth, <ambiGroup, <send, sendSynthDef;
+	var server, <num, numChannels, <>group, <>masterBus, <>fxBus, <ambiBus, <sendBus, <sendSynth, <ambiGroup, <send, sendSynthDef, <>vstSynth;
 
 	*new {|server, num, numChannels, group, masterBus, fxBus|
 		^super.newCopyArgs(server, num, numChannels, group, masterBus, fxBus).init;
@@ -12,6 +12,7 @@ RoutingHOA {
 		sendSynth = Array.newClear(num);
 		ambiGroup = Array.newClear(num);
 		send = Array.newClear(num);
+		vstSynth = Array.newClear(num);
 
 		sendSynthDef = SynthDef(\ambiThrow, {
 			var sig = In.ar(\from.kr(0), numChannels);
@@ -33,3 +34,5 @@ RoutingHOA {
 	}
 
 }
+
+///possibly include encoder = Array.newClear(num)?
