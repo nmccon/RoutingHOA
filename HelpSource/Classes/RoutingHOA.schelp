@@ -1,7 +1,7 @@
 TITLE:: RoutingHOA
-summary:: (put short description here)
+summary:: simple abstraction of commonly used routing and grouping configurations for the IEM HOA VST plugins
 categories:: Undocumented classes
-related:: Classes/SomeRelatedClass, Reference/SomeRelatedStuff, etc.
+related:: Guides/High order ambisonics using IEM Plugins
 
 DESCRIPTION::
 (put long description here)
@@ -13,22 +13,24 @@ METHOD:: new
 (describe method here)
 
 ARGUMENT:: server
-(describe argument here)
+server
 
 ARGUMENT:: num
-(describe argument here)
+Number of buses, synths and groups to instantiate
 
 ARGUMENT:: numChannels
-(describe argument here)
+Number of HOA audio channels. e.g.
+~order = 3;
+~numChannels = ((~order + 1) **2).asInteger;
 
 ARGUMENT:: group
-(describe argument here)
+ambisonic master group
 
 ARGUMENT:: masterBus
-(describe argument here)
+ambisonic master bus
 
 ARGUMENT:: fxBus
-(describe argument here)
+ambisonic fx bus
 
 returns:: (describe returnvalue here)
 
