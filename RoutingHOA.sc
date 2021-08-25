@@ -1,5 +1,5 @@
 RoutingHOA {
-	var server, <num, numChannels, <>group, <>masterBus, <>fxBus, <ambiBus, <sendBus, <sendSynth, <ambiGroup, <send, sendSynthDef, <>vstSynth;
+	var server, <num, numChannels, <>group, <>masterBus, <>fxBus, <ambiBus, <sendBus, <sendSynth, <ambiGroup, <send, sendSynthDef, <>vstControl;
 
 	*new {|server, num, numChannels, group, masterBus, fxBus|
 		^super.newCopyArgs(server, num, numChannels, group, masterBus, fxBus).init;
@@ -12,7 +12,7 @@ RoutingHOA {
 		sendSynth = Array.newClear(num);
 		ambiGroup = Array.newClear(num);
 		send = Array.newClear(num);
-		vstSynth = Array.newClear(num);
+		vstControl = Array.newClear(num);
 
 		sendSynthDef = SynthDef(\ambiThrow, {
 			var sig = In.ar(\from.kr(0), numChannels);
@@ -33,6 +33,8 @@ RoutingHOA {
 		}
 	}
 
+	freeVstControl {
+		this.vstControl.do{|i| i.synth.set(\gate, 0)} //this assumes the SynthDef containing the VSTPluginController has an envelope with controls for gate and DoneAction.
+	}
 }
 
-///possibly include encoder = Array.newClear(num)?

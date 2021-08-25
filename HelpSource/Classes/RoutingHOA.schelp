@@ -1,11 +1,10 @@
 TITLE:: RoutingHOA
 summary:: simple abstraction of commonly used routing and grouping configurations for the IEM HOA VST plugins
 categories:: Undocumented classes
-related:: Guides/High order ambisonics using IEM Plugins
+related:: Classes/VSTPluginController, Guides/HOA_IEM
 
 DESCRIPTION::
-(put long description here)
-
+This class also includes the fxsend Synthdef (\ambithrow) just in case. It needs reinstantiation if num needs to change and after Cmd period.
 
 CLASSMETHODS::
 
@@ -13,15 +12,13 @@ METHOD:: new
 (describe method here)
 
 ARGUMENT:: server
-server
+The server on which to place the instance of RoutingHOA
 
 ARGUMENT:: num
-Number of buses, synths and groups to instantiate
+The number of buses, synths and groups to instantiate
 
 ARGUMENT:: numChannels
-Number of HOA audio channels. e.g.
-~order = 3;
-~numChannels = ((~order + 1) **2).asInteger;
+The number of channels for the chosen HOA order
 
 ARGUMENT:: group
 ambisonic master group
@@ -32,8 +29,7 @@ ambisonic master bus
 ARGUMENT:: fxBus
 ambisonic fx bus
 
-returns:: (describe returnvalue here)
-
+returns:: link::Classes/RoutingHOA#num:: number of ambisonic encoding groups with a fx send synth at the tail of each group.
 
 INSTANCEMETHODS::
 
@@ -68,7 +64,7 @@ METHOD:: masterBus
 returns:: (describe returnvalue here)
 
 METHOD:: num
-(describe method here)
+link::Classes/RoutingHOA#num::
 
 returns:: (describe returnvalue here)
 
@@ -83,12 +79,12 @@ METHOD:: fxBus
 returns:: (describe returnvalue here)
 
 METHOD:: routing
-(describe method here)
+private
 
 returns:: (describe returnvalue here)
 
 METHOD:: init
-(describe method here)
+private
 
 returns:: (describe returnvalue here)
 
@@ -96,5 +92,58 @@ returns:: (describe returnvalue here)
 EXAMPLES::
 
 code::
-(some example code)
+//Instead of copying and pasting this large function each time
+
+(
+s.newBusAllocators;
+~numBus = 2;
+~ambiBus = Array.newClear(~numBus);
+~sendBus = Array.newClear(~numBus);
+~ambiGroup = Array.newClear(~numBus);
+~encoder = Array.newClear(~numBus);
+~send = Array.newClear(~numBus);
+
+~numBus.do{ |i|
+	~ambiBus[i] = Bus.audio(s, ~numChannels);
+	~sendBus[i] = Bus.audio(s, ~numChannels);
+	~ambiGroup[i] = Group.before(~ambiMasterFXGroup);
+
+	~encoder[i] = VSTPluginController(
+		Synth(\basicDopplerTemplate, [
+			\buf, ~bufs[\Tears].choose,
+			\pos, rrand(2, 4),
+			\objspeed, rrand(0.5, 2),
+			\objdist, rrand(4, 10),
+			\rate, 1,
+			\gain, 3.dbamp,
+			\out, ~ambiBus[i],
+			\fxout, ~sendBus[i],
+		], ~ambiGroup[i], \addToTail)
+	).open;
+
+	~send[i] = Synth(\ambiThrow, [\from, ~ambiBus[i], \to, ~hoaBus[\ambiMasterBus], \fromfx, ~sendBus[i], \tofx,  ~hoaBus[\ambiFxBus] ], ~ambiGroup[i], \addToTail);
+}
+)
+
+//do this...
+
+x = RoutingHOA.new(s, 1, ~numChannels, ~ambiMasterFXGroup, ~hoaBus[\ambiMasterBus],~hoaBus[\ambiFxBus])
+
+(
+x.num.do{|i|
+	x.vstControl[i] = VSTPluginController(
+		Synth(\basicDopplerTemplate, [
+			\buf, ~bufs[\Tears].choose,
+			\pos, rrand(2, 4),
+			\objspeed, rrand(0.5, 2),
+			\objdist, rrand(4, 10),
+			\rate, 1,
+			\gain, -3.dbamp,
+			\out, x.ambiBus[i],
+			\fxout, x.sendBus[i],
+		], x.ambiGroup[i], addAction:  \addToHead)
+	);
+	x.vstControl[i].open('StereoEncoder');
+}
+)
 ::
