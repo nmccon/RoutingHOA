@@ -31,7 +31,12 @@ RoutingHOA {
 				sendBus[i] = Bus.audio(server,numChannels);
 				ambiGroup[i] = Group.before(group);
 				server.sync;
-				sendSynth[i] = Synth(\ambiThrow, [\from, ambiBus[i], \to, masterBus, \fromfx, sendBus[i], \tofx,  fxBus ], ambiGroup[i], \addToTail);
+				sendSynth[i] = Synth(\ambiThrow, [
+					\from, ambiBus[i],
+					\to, masterBus,
+					\fromfx, sendBus[i],
+					\tofx,  fxBus
+				], ambiGroup[i], \addToTail);
 			};
 		};
 	}
