@@ -1,5 +1,5 @@
 RoutingHOA {
-	var server, <num, numChannels, <>group, <>masterBus, <>fxBus, <ambiBus, <sendBus, <sendSynth, <ambiGroup, <send, sendSynthDef, <>vstControl;
+	var server, <num, numChannels, <>group, <>masterBus, <>fxBus, <ambiBus, <sendBus, <sendSynth, <ambiGroup, <send, sendSynthDef, <>controlArray;
 
 	*new {|server, num, numChannels, group, masterBus, fxBus|
 		^super.newCopyArgs(server, num, numChannels, group, masterBus, fxBus).init;
@@ -12,7 +12,7 @@ RoutingHOA {
 		sendSynth = Array.newClear(num);
 		ambiGroup = Array.newClear(num);
 		send = Array.newClear(num);
-		vstControl = Array.newClear(num);
+		controlArray = Array.newClear(num);
 
 		sendSynthDef = SynthDef(\ambiThrow, {
 			var sig = In.ar(\from.kr(0), numChannels);
@@ -25,16 +25,24 @@ RoutingHOA {
 	}
 
 	routing {
-		num.do{|i|
-			ambiBus[i] = Bus.audio(server,numChannels);
-			sendBus[i] = Bus.audio(server,numChannels);
-			ambiGroup[i] = Group.before(group);
-			sendSynth[i] = Synth(\ambiThrow, [\from, ambiBus[i], \to, masterBus, \fromfx, sendBus[i], \tofx,  fxBus ], ambiGroup[i], \addToTail);
-		}
+		server.bind{
+			num.do{|i|
+				ambiBus[i] = Bus.audio(server,numChannels);
+				sendBus[i] = Bus.audio(server,numChannels);
+				ambiGroup[i] = Group.before(group);
+				server.sync;
+				sendSynth[i] = Synth(\ambiThrow, [\from, ambiBus[i], \to, masterBus, \fromfx, sendBus[i], \tofx,  fxBus ], ambiGroup[i], \addToTail);
+			};
+		};
 	}
 
-	freeVstControl {
-		this.vstControl.do{|i| i.synth.set(\gate, 0)} //this assumes the SynthDef containing the VSTPluginController has an envelope with controls for gate and DoneAction.
+	freeControlArray {
+		controlArray.do{|i|
+			case
+			{i.class == VSTPluginController} {i.synth.set(\gate, 0)}
+			{i.class == Synth} {i.set(\gate, 0)}
+		};
 	}
 }
+
 
