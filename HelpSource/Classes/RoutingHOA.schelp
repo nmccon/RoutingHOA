@@ -131,7 +131,7 @@ x = RoutingHOA.new(s, 1, ~numChannels, ~ambiMasterFXGroup, ~hoaBus[\ambiMasterBu
 
 (
 x.num.do{|i|
-	x.vstControl[i] = VSTPluginController(
+	x.controlArray[i] = VSTPluginController(
 		Synth(\basicDopplerTemplate, [
 			\buf, ~bufs[\Tears].choose,
 			\pos, rrand(2, 4),
@@ -143,7 +143,10 @@ x.num.do{|i|
 			\fxout, x.sendBus[i],
 		], x.ambiGroup[i], addAction:  \addToHead)
 	);
-	x.vstControl[i].open('StereoEncoder');
+	x.controlArray[i].open('StereoEncoder');
 }
 )
+
+x.controlArray[0].editor
+
 ::
